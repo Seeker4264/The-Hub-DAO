@@ -49,6 +49,8 @@
     background-color: var(--custom-green-searchbar);
     color: var(--custom-lightgreen-highlighted);
     width: 500px;
+    max-width: 500px;
+    min-width: 200px;
 }
 
 .topnav div.searchbar input[type=text]::placeholder {
