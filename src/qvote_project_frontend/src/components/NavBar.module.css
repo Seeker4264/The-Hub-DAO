@@ -1,10 +1,13 @@
 /* Custom color variables */
 :root {
-    --custom-green-searchbar: #15705A;
+    --custom-darkgreen-highlighted: #0a3026;
+    --custom-darkgreen: #061F19;
     --custom-green-highlighted: #136451;
     --custom-green: #0E493B;
+    --custom-green-searchbar: #15705A;
     --custom-lightgreen-highlighted: #31ffd2;
     --custom-lightgreen: #00c59a;
+    --custom-whitegreen: #baf5e8;
 }
 
 /* Navbar container */
@@ -76,7 +79,7 @@
 }
   
 /* Navbar active property */
-/*.topnav div.active {
-    background-color: #04AA6D;
-    color: white;
-}*/
+.active div {
+    border-bottom: 2px solid var(--custom-lightgreen);
+    color: var(--custom-whitegreen);
+}
