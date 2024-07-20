@@ -5,6 +5,7 @@
     --custom-green-highlighted: #136451;
     --custom-green: #0E493B;
     --custom-green-searchbar: #15705A;
+    --custom-green-searchbar-highlighted: #138f70;
     --custom-lightgreen-highlighted: #31ffd2;
     --custom-lightgreen: #00c59a;
     --custom-whitegreen: #baf5e8;
@@ -12,7 +13,7 @@
 
 .communityContainer {
     width: 70%;
-    min-height: 20rem;
+    min-height: 27rem;
     background-color: var(--custom-darkgreen);
     border-radius: 20px;
     max-width: fit-content;

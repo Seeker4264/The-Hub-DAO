@@ -5,6 +5,7 @@
     --custom-green-highlighted: #136451;
     --custom-green: #0E493B;
     --custom-green-searchbar: #15705A;
+    --custom-green-searchbar-highlighted: #138f70;
     --custom-lightgreen-highlighted: #31ffd2;
     --custom-lightgreen: #00c59a;
     --custom-whitegreen: #baf5e8;
@@ -35,6 +36,7 @@
 
 .topnav div.logo {
     float: left;
+    border-bottom: 2px solid var(--custom-green);
 }
 
 /* Navbar search bar */
@@ -47,13 +49,15 @@
 .topnav div.searchbar input[type=text] {
     border: none;
     padding: 7px 15px;
-    border-radius: 60px;
+    border-top-left-radius: 60px;
+    border-bottom-left-radius: 60px;
     outline: none;
     background-color: var(--custom-green-searchbar);
     color: var(--custom-lightgreen-highlighted);
     width: 500px;
     max-width: 500px;
     min-width: 200px;
+    height: 18px;
 }
 
 .topnav div.searchbar input[type=text]::placeholder {
@@ -65,6 +69,36 @@
 .topnav div.searchbar input[type=text]::-ms-input-placeholder {
     /* Edge 12 -18 */
     color: var(--custom-lightgreen);
+}
+
+.topnav div.searchbar img {
+    margin: 0px;
+    padding: 0px;
+    width: 1.5em;
+    filter: invert();
+}
+
+.topnav div.searchbar button {
+    margin: 0px;
+    padding: 7px 10px;
+    border: none;
+    border-top-right-radius: 60px;
+    border-bottom-right-radius: 60px;
+    background-color: var(--custom-green-searchbar);
+    max-width: fit-content;
+    height: 32px;
+    cursor: pointer;
+}
+
+.topnav div.searchbar button:hover {
+    background-color: var(--custom-green-searchbar-highlighted);
+}
+
+.searching {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0%;
 }
 
 /* Navbar hover */

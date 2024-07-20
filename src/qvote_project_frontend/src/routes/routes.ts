@@ -8,4 +8,8 @@ export const routes = [
         path: "/communities",
         name: "Communities",
     },
+    {
+        path: "/search",
+        name: "Search",
+    },
 ]

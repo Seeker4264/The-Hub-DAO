@@ -1,8 +1,23 @@
-import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import styles from './NavBar.module.css';
 
+import searchImg from '../assets/search.svg';
+
+
 function NavBar() {
+    const [search, setSearch] = useState('');
+
+    const navigate = useNavigate();
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if(search) {
+            console.log(search);
+            navigate(`/search?q=${search}`);
+        }
+    };
 
     return (
         <div className={styles.topnav}>
@@ -26,10 +41,17 @@ function NavBar() {
             }>
                 <div className={styles.left}>Communities</div>
             </NavLink>
-            <div className={styles.searchbar}><input type="text" placeholder='Search Hub' /></div>
+            <div className={styles.searchbar}>
+                <form className={styles.searching} onSubmit={handleSubmit}>
+                    <input type="text" placeholder='Search Hub' onChange={(e) => {
+                        setSearch(e.target.value);
+                    }} />
+                    <button><img src={searchImg} alt="Search" /></button>
+                </form>
+            </div>
             <div className={styles.right}>Register</div>
         </div>
     )
-}
+};
 
-export default NavBar
+export default NavBar;

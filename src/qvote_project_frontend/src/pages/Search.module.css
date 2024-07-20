@@ -11,15 +11,15 @@
     --custom-whitegreen: #baf5e8;
 }
 
-.popularContainer {
+.searchContainer {
     width: 70%;
-    min-height: 20rem;
+    min-height: 27rem;
     background-color: var(--custom-darkgreen);
     border-radius: 20px;
     max-width: fit-content;
     min-width: 70%;
     margin-left: auto;
-    margin-right: 8%;
+    margin-right: auto;
     margin-top: 50px;
 }
 
@@ -36,4 +36,6 @@
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     padding: 20px;
+    font-size: 16px;
+    color: var(--custom-whitegreen);
 }

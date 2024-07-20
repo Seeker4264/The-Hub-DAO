@@ -4,6 +4,7 @@ import Root from './layout/Root.jsx';
 
 import Home from "./pages/Home.jsx";
 import Communities from "./pages/Communities.jsx";
+import Search from "./pages/Search.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
             {
                 path: routes[1].path,
                 element: <Communities />,
+            },
+            {
+                path: routes[2].path,
+                element: <Search />,
             },
         ]
     }
