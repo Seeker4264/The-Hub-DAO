@@ -88,6 +88,7 @@
     max-width: fit-content;
     height: 32px;
     cursor: pointer;
+    outline: none;
 }
 
 .topnav div.searchbar button:hover {
