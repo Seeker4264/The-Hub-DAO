@@ -12,5 +12,16 @@ module {
         age : Nat;
     };
 
+    public type Comment = {
+        comDate : Text;
+        comDesc : Text;
+    };
+
+    public type Post = {
+        postDate : Text;
+        postTitle : Text;
+        postDesc : Text;
+        postComments : HashMap<Principal, Comment>; // Not sure if it is like this
+    }
 
 };

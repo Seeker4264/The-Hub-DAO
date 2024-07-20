@@ -4,6 +4,7 @@ import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
+import Array "mo:base/Array";
 import Types "daoTemp.types";
 
 actor class DAO(name : Text, manifesto : Text) {
@@ -19,6 +20,8 @@ actor class DAO(name : Text, manifesto : Text) {
     let daoMembers = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
     let daoLedger = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
 
+    let daoPosts = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
+
     //                                            //
     //  getter/setter for DAO name and manifesto  //
     //                                            //
@@ -27,7 +30,7 @@ actor class DAO(name : Text, manifesto : Text) {
         return daoName;
     };
 
-    public query func getManifesto() : async Text {
+    public shared query func getManifesto() : async Text {
         return daoManifesto;
     };
 

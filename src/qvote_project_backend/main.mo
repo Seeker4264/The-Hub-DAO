@@ -4,6 +4,8 @@ import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
+import Array "mo:base/Array";
+import Text "mo:base/Text";
 import Types "daoTemp.types";
 import daoTemplate "daoTemp";
 
@@ -20,7 +22,24 @@ actor {
     };
 
     public shared query func getDaos() : async [indDao] {
-        Buffer.toArray(daoList);
+        return Buffer.toArray(daoList);
+    };
+
+    public shared func getDaoName(i : Nat) : async Text {
+        let dao = daoList.get(i);
+        return await dao.getName()
+    };
+
+    public shared func getDaosNames() : async [Text] {
+        let listing = Buffer.Buffer<Text>(5);
+
+        for(i in Iter.range(0, daoList.size() - 1)) {
+            let dao = daoList.get(i);
+            let naming = await dao.getName();
+            listing.add(naming);
+        };
+
+        return Buffer.toArray(listing);
     };
 
     public query func greet(name : Text) : async Text {
