@@ -8,7 +8,7 @@ import Array "mo:base/Array";
 import Types "daoTemp.types";
 
 actor class DAO(name : Text, manifesto : Text) {
-
+    
     type Member = Types.Member;
     type HashMap<K, V> = Types.HashMap<K, V>;
     type Result<Ok, Err> = Types.Result<Ok, Err>;
@@ -88,6 +88,16 @@ actor class DAO(name : Text, manifesto : Text) {
                 return #ok(member);
             };
         };
+    };
+
+    public query func getMembers() : async [Member] {
+        let newArray = Buffer.Buffer<Member>(5);
+
+        for ((key, value) in daoMembers.entries()) {
+            newArray.add(value);
+        };
+
+        return Buffer.toArray(newArray);
     };
 
 };
