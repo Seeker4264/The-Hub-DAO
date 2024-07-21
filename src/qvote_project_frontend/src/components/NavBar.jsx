@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import styles from './NavBar.module.css';
+import logo from '../assets/The_Hub_DAO_Presentation.png';
 
 import searchImg from '../assets/search.svg';
 
@@ -21,7 +22,9 @@ function NavBar() {
 
     return (
         <div className={styles.topnav}>
-            <div className={styles.logo}>Logo</div>
+            <Link to='/'>
+                <div className={styles.logo}><img src={logo} alt="" /></div>
+            </Link>
             <NavLink to='/' className={({ isActive, isPending, isTransitioning }) =>
                 [
                     isPending ? "pending" : "",

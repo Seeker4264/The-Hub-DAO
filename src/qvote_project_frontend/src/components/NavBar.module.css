@@ -35,8 +35,19 @@
 }
 
 .topnav div.logo {
+    margin: 0px;
+    padding: 0px;
     float: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-bottom: 2px solid var(--custom-green);
+}
+
+.topnav div.logo img {
+    margin: 0px;
+    padding: 0px;
+    width: 70px;
 }
 
 /* Navbar search bar */
