@@ -39,3 +39,13 @@
     font-size: 16px;
     color: var(--custom-whitegreen);
 }
+
+.forum {
+    border-top: 1px solid var(--custom-darkgreen-highlighted);
+    border-bottom: 1px solid var(--custom-darkgreen-highlighted);
+    padding: 16px 0px;
+}
+
+.forum h2 {
+    margin-bottom: 20px;
+}

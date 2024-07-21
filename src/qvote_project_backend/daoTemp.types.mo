@@ -22,6 +22,6 @@ module {
         postTitle : Text;
         postDesc : Text;
         postComments : HashMap<Principal, Comment>; // Not sure if it is like this
-    }
+    };
 
 };
