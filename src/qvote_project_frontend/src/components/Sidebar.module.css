@@ -1,0 +1,38 @@
+/* Custom color variables */
+:root {
+    --custom-darkgreen-highlighted: #0a3026;
+    --custom-darkgreen: #061F19;
+    --custom-green-highlighted: #136451;
+    --custom-green: #0E493B;
+    --custom-green-searchbar: #15705A;
+    --custom-green-searchbar-highlighted: #138f70;
+    --custom-lightgreen-highlighted: #31ffd2;
+    --custom-lightgreen: #00c59a;
+    --custom-whitegreen: #baf5e8;
+}
+
+.sideContainer {
+    width: 15%;
+    height: 375px;
+    background-color: var(--custom-green);
+    position: absolute;
+    top: 80px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.sideContainer h2 {
+    font-size: 20px;
+    text-align: center;
+    font-weight: 500;
+    padding: 8px 24px;
+    color: var(--custom-lightgreen);
+}
+
+.sideContainer hr {
+    margin: 1px 5.333px;
+    padding: 0px;
+    width: 90%;
+    border: 3px solid var(--custom-green-highlighted);
+    border-radius: 2px;
+}
