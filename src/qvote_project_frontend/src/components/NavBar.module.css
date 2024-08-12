@@ -15,6 +15,7 @@
 .topnav {
     background-color: var(--custom-green);
     overflow: hidden;
+    user-select: none;
 }
   
 /* Navbar items */
