@@ -9,6 +9,7 @@
     --custom-lightgreen-highlighted: #31ffd2;
     --custom-lightgreen: #00c59a;
     --custom-whitegreen: #baf5e8;
+    --custom-white: #ffffff;
 }
 
 .communityContainer {
@@ -32,10 +33,36 @@
 }
 
 .containerContent {
-    color: var(--custom-green-highlighted);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     padding: 20px;
     font-size: 16px;
     color: var(--custom-whitegreen);
+
+    display: flex;
+    gap: 20px;
+    line-height: 30px;
+}
+
+.containerContent div {
+    font-weight: 200;
+    max-width: 10rem;
+}
+
+.containerContent h3 {
+    font-weight: 600;
+}
+
+.containerContent h3:hover {
+    color: var(--custom-white);
+    cursor: pointer;
+}
+
+.containerContent p {
+    font-weight: 200;
+}
+
+.containerContent p:hover {
+    color: var(--custom-white);
+    cursor: pointer;
 }
