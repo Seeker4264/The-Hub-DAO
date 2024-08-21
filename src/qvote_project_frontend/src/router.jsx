@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router-dom";
-import { routes } from "./routes/routes.ts";
 import Root from './layout/Root.jsx';
 
 import Home from "./pages/Home.jsx";
@@ -12,15 +11,15 @@ export const router = createBrowserRouter([
         element: <Root/>,
         children: [
             {
-              path: routes[0].path,
+              path: "/",
               element: <Home />,
             },
             {
-                path: routes[1].path,
+                path: "/communities",
                 element: <Communities />,
             },
             {
-                path: routes[2].path,
+                path: "/search",
                 element: <Search />,
             },
         ]

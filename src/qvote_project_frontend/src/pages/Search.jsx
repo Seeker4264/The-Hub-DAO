@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { qvote_project_backend } from 'declarations/qvote_project_backend';
-import styles from './Search.module.css';
 
 
 function Search() {
@@ -43,8 +43,10 @@ function Search() {
 
         return liste.map((querky, index) => {
             return (
-                <div key={index} className={styles.forum}>
-                    <h2>{querky.name}</h2>
+                <div key={index} className="border-t-custom-darkgreen-highlighted
+                border-b-custom-darkgreen-highlighted
+                px-0 py-4">
+                    <h2 className='mb-5'>{querky.name}</h2>
                     <p>{querky.manifesto}</p>
                 </div>
             );
@@ -55,14 +57,26 @@ function Search() {
     
 
     return (
-        <div className={styles.container}>
-            <div className={styles.searchContainer}>
-                <div className={styles.containerHeader}>
-                    Results for the search "{query}"
+        <>
+            {/*<div className="flex justify-center items-center">*/}
+                <div className="bg-custom-darkgreen
+                min-w-[70%] max-w-fit
+                min-h-96
+                ml-auto mr-auto my-12
+                rounded-3xl">
+                    <div className="bg-custom-green
+                    rounded-t-3xl
+                    px-[3%] py-[1%]
+                    text-custom-lightgreen text-xl
+                    font-normal">
+                        Results for the search "{query}"
+                    </div>
+                    <div className="text-custom-green-highlighted
+                    text-base
+                    p-5">{renderDAOs()}</div>
                 </div>
-                <div className={styles.containerContent}>{renderDAOs()}</div>
-            </div>
-        </div>
+            {/*</div>*/}
+        </>
     )
 };
 
