@@ -1,7 +1,10 @@
 
-
+import { useContext } from 'react'; // global state test
+import { userContext } from '../layout/Root'; // global state test
 
 function Sidebar() {
+    const { currentUser, setCurrentUser } = useContext(userContext); // global state test
+
     return (
         <div className="absolute
         left-0
@@ -13,7 +16,8 @@ function Sidebar() {
             <h2 className="text-xl text-center
             font-medium
             text-custom-lightgreen
-            px-6 py-2">Recent Trends</h2>
+            px-6 py-2">{currentUser !== null ? currentUser : 'Recent Trends'
+            /* global state test */}</h2>
             <hr className="w-[90%]
             border-2
             border-custom-green-searchbar-highlighted
