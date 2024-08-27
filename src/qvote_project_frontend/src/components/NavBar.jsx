@@ -1,8 +1,6 @@
 
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Actor } from "@dfinity/agent";
-import { AuthClient } from "@dfinity/auth-client";
 import { qvote_project_backend } from 'declarations/qvote_project_backend';
 import { userContext } from '../layout/Root';
 
@@ -13,44 +11,7 @@ import searchImg from '../assets/search.svg';
 function NavBar() {
     const [search, setSearch] = useState('');
     const navigate = useNavigate();
-    const { currentUser, setCurrentUser } = useContext(userContext); // principalId
-
-
-    // AuthCLient
-
-    let authClient = null;
-
-    async function init() {
-        authClient = await AuthClient.create();
-    };
-    init();
-
-    
-    const handleSuccess = () => {
-        const principalId = authClient.getIdentity().getPrincipal().toText();
-        
-        console.log(principalId);
-        
-        setCurrentUser(principalId);
-        
-        Actor.agentOf(qvote_project_backend).replaceIdentity(
-            authClient.getIdentity()
-        );
-    }
-    
-    const handleLogin = () => {
-        authClient.login({
-            maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days in nanoseconds
-            onSuccess: async () => {
-                handleSuccess()
-            },
-            windowOpenerFeatures: `
-            left=${window.screen.width / 2 - 525 / 2},
-            top=${window.screen.height / 2 - 705 / 2},
-            toolbar=0,location=0,menubar=0,width=525,height=705
-            `,
-        });
-    };
+    const { authenticationClient } = useContext(userContext); // AuthClient Context
 
     // Search Bar
     
@@ -60,6 +21,7 @@ function NavBar() {
             navigate(`/search?q=${search}`);
         }
     };
+
 
     return (
         <div className="bg-custom-green
@@ -144,6 +106,8 @@ function NavBar() {
                 </form>
 
             </div>
+            
+            {!authenticationClient.isAuthenticated &&
             <div className="text-custom-lightgreen
                 text-center no-underline
                 font-semibold
@@ -151,7 +115,35 @@ function NavBar() {
                 float-right
                 hover:bg-custom-green-highlighted
                 hover:text-custom-lightgreen-highlighted"
-                onClick={handleLogin}>Sign In</div>
+                onClick={authenticationClient.handleLogin}>Sign In</div>}
+            
+            {authenticationClient.isAuthenticated &&
+            <div className="text-custom-lightgreen
+                text-center no-underline
+                font-semibold
+                px-5 py-4
+                float-right
+                hover:bg-custom-green-highlighted
+                hover:text-custom-lightgreen-highlighted"
+                onClick={authenticationClient.handleLogout}>Logout</div>}
+
+            {/* button to test auth functionality */}
+            <div className="text-custom-lightgreen
+                text-center no-underline
+                font-semibold
+                px-5 py-4
+                float-right
+                hover:bg-custom-green-highlighted
+                hover:text-custom-lightgreen-highlighted"
+                onClick={async () => {
+                    console.log(authenticationClient.currentUser)
+                    console.log(typeof authenticationClient.currentUser)
+                    console.log(authenticationClient.identity)
+                    console.log(typeof authenticationClient.identity)
+                    console.log(authenticationClient.principal.toText())
+                    console.log(typeof authenticationClient.principal.toText())
+                    console.log(authenticationClient.isAuthenticated)
+                }}>Test</div>
         </div>
     )
 };
