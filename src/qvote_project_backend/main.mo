@@ -6,6 +6,7 @@ import Iter "mo:base/Iter";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
+import Cycles "mo:base/ExperimentalCycles";
 import Types "daoTemp.types";
 import daoTemplate "daoTemp";
 
@@ -28,6 +29,9 @@ actor {
     // Create DAO
 
     public func createDao(daoName : Text, daoManifesto : Text) : async () {
+
+        Cycles.add<system>(1000000000000); // Pass cycles for the Dao creation
+
         let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto);
         daoList.add(dao);
         return;
@@ -130,6 +134,10 @@ actor {
 
     public shared query ({caller}) func greet2(name : Text) : async Text {
         return "Hello, " # name # "! " # "Your PrincipalId is: " # Principal.toText(caller);
+    };
+
+    public query func canBalance() : async Nat {
+        return Cycles.balance();
     };
 
 };
