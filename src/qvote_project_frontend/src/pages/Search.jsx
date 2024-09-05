@@ -17,7 +17,6 @@ function Search() {
             
             await qvote_project_backend.getSearchDaos().then((bQuery) => {
                 for(let i in bQuery) {
-                    console.log(bQuery[i]);
                     if(bQuery[i].name.includes(query) ||
                         bQuery[i].manifesto.includes(query) ||
                         bQuery[i].name.toLowerCase().includes(query) ||
@@ -43,11 +42,13 @@ function Search() {
 
         return liste.map((querky, index) => {
             return (
-                <div key={index} className="border-t-custom-darkgreen-highlighted
-                border-b-custom-darkgreen-highlighted
+                <div key={index} className="border-t-2 border-b-2
+                border-custom-darkgreen-highlighted
                 px-0 py-4">
-                    <h2 className='mb-5'>{querky.name}</h2>
-                    <p>{querky.manifesto}</p>
+                    <h2 className='text-3xl mb-2
+                    text-custom-lightgreen'>{querky.name}</h2>
+                    <p className='text-base
+                    text-custom-lightgreen'>{querky.manifesto}</p>
                 </div>
             );
         });
@@ -60,7 +61,7 @@ function Search() {
         <>
             {/*<div className="flex justify-center items-center">*/}
                 <div className="bg-custom-darkgreen
-                min-w-[70%] max-w-fit
+                w-[70%]
                 min-h-96
                 ml-auto mr-auto my-12
                 rounded-3xl">

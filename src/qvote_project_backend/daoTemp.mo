@@ -5,6 +5,8 @@ import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
+import Cycles "mo:base/ExperimentalCycles";
+
 import Types "daoTemp.types";
 
 actor class DAO(name : Text, manifesto : Text) {
@@ -98,6 +100,10 @@ actor class DAO(name : Text, manifesto : Text) {
         };
 
         return Buffer.toArray(newArray);
+    };
+
+    public query func daoBalance() : async Nat {
+        return Cycles.balance();
     };
 
 };

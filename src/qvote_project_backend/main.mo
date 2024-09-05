@@ -7,6 +7,7 @@ import Option "mo:base/Option";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
+
 import Types "daoTemp.types";
 import daoTemplate "daoTemp";
 
@@ -17,6 +18,7 @@ actor {
     type Member = Types.Member;
     type indDao = daoTemplate.DAO;
 
+    stable var daoList_store : [indDao] = [];
     let daoList = Buffer.Buffer<indDao>(5);
 
     // Classes
@@ -30,7 +32,7 @@ actor {
 
     public func createDao(daoName : Text, daoManifesto : Text) : async () {
 
-        Cycles.add<system>(1000000000000); // Pass cycles for the Dao creation
+        Cycles.add<system>(500000000000); // Pass cycles for the Dao creation
 
         let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto);
         daoList.add(dao);
@@ -126,18 +128,32 @@ actor {
         };
     };
 
+    public func daoCyclesBalance(daoName : Text) : async Result<Nat, Text> {
+        let dao = await getDaoByName(daoName);
+
+        switch (dao) {
+            case (null) {
+                return #err("DAO doesn't exist");
+            };
+            case (?indDao) {
+                return #ok(await indDao.daoBalance());
+            };
+        };
+    };
+
     // Unrelated functions
 
-    public query func greet(name : Text) : async Text {
-        return "Hello, " # name # "!";
-    };
-
-    public shared query ({caller}) func greet2(name : Text) : async Text {
-        return "Hello, " # name # "! " # "Your PrincipalId is: " # Principal.toText(caller);
-    };
-
-    public query func canBalance() : async Nat {
+    public query func mainDaoBalance() : async Nat {
         return Cycles.balance();
     };
 
+    // Custom stable memory functions
+
+    system func preupgrade() {
+        daoList_store := Iter.toArray(daoList.vals());
+    };
+
+    system func postupgrade() {
+        daoList_store := [];
+    };
 };
