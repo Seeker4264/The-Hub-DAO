@@ -32,10 +32,30 @@ actor {
 
     public func createDao(daoName : Text, daoManifesto : Text) : async () {
 
-        Cycles.add<system>(500000000000); // Pass cycles for the Dao creation
+        Cycles.add<system>(250000000000); // Pass cycles for the Dao creation
 
         let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto);
         daoList.add(dao);
+        return;
+    };
+
+    // Delete DAO
+
+    public func deleteDao(daoName : Text) : async Result<Text, Text> {     
+        for (i in Iter.range(0, daoList.size() - 1)) {
+            let dao = daoList.get(i);
+            let naming = await dao.getName();
+            if (naming == daoName) {
+                let x = daoList.remove(i);
+                return #ok("DAO deleted successfully");
+            };
+        };
+
+        return #err("DAO doesn't exist");
+    };
+
+    public func resetBuffer() : async () {
+        daoList.clear();
         return;
     };
 
@@ -56,6 +76,18 @@ actor {
             let naming = await dao.getName();
             if (naming == name) {
                 return ?dao;
+            };
+        };
+
+        return null;
+    };
+
+    public shared func getDaoInX(name : Text) : async ?Nat {
+        for (i in Iter.range(0, daoList.size() - 1)) {
+            let dao = daoList.get(i);
+            let naming = await dao.getName();
+            if (naming == name) {
+                return ?i;
             };
         };
 
