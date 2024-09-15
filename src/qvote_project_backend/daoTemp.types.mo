@@ -8,6 +8,7 @@ module {
     public type HashMap<Ok, Err> = HashMap.HashMap<Ok, Err>;
 
     public type Member = {
+        principal : Principal;
         name : Text;
         age : Nat;
     };

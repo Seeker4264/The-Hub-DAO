@@ -28,18 +28,22 @@ actor {
         public let manifesto = dManifesto;
     };
 
-    // Create DAO
+    //              //
+    //  Create DAO  //
+    //              //
 
-    public func createDao(daoName : Text, daoManifesto : Text) : async () {
+    public func createDao(daoName : Text, daoManifesto : Text, daoTkName : Text, daoTkSymbol : Text) : async () {
 
         Cycles.add<system>(250000000000); // Pass cycles for the Dao creation
 
-        let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto);
+        let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto, daoTkName, daoTkSymbol);
         daoList.add(dao);
         return;
     };
 
-    // Delete DAO
+    //              //
+    //  Delete DAO  //
+    //              //
 
     public func deleteDao(daoName : Text) : async Result<Text, Text> {     
         for (i in Iter.range(0, daoList.size() - 1)) {
@@ -59,7 +63,9 @@ actor {
         return;
     };
 
-    // Get methods for DAOs
+    //           //
+    //  Get DAO  //
+    //           //
 
     public shared query func getDaos() : async [indDao] {
         return Buffer.toArray(daoList);
@@ -132,7 +138,11 @@ actor {
         return Buffer.toArray(listing);
     };
 
-    // DAO specific
+    //                //
+    //  DAO specific  //
+    //                //
+
+    // Manifesto
 
     public func getDaoManifesto(daoName : Text) : async Result<Text, Text> {
         let dao = await getDaoByName(daoName);
@@ -160,6 +170,12 @@ actor {
         };
     };
 
+    // Members
+
+    
+
+    // Balance
+
     public func daoCyclesBalance(daoName : Text) : async Result<Nat, Text> {
         let dao = await getDaoByName(daoName);
 
@@ -173,13 +189,17 @@ actor {
         };
     };
 
-    // Unrelated functions
+    //                       //
+    //  Unrelated functions  //
+    //                       //
 
     public query func mainDaoBalance() : async Nat {
         return Cycles.balance();
     };
 
-    // Custom stable memory functions
+    //                                  //
+    //  Custom stable memory functions  //
+    //                                  //
 
     system func preupgrade() {
         daoList_store := Iter.toArray(daoList.vals());

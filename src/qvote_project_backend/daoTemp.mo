@@ -9,7 +9,7 @@ import Cycles "mo:base/ExperimentalCycles";
 
 import Types "daoTemp.types";
 
-actor class DAO(name : Text, manifesto : Text) {
+actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Text) {
     
     type Member = Types.Member;
     type HashMap<K, V> = Types.HashMap<K, V>;
@@ -22,8 +22,8 @@ actor class DAO(name : Text, manifesto : Text) {
     let daoMembers = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
 
     let daoLedger = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
-    var tkName : Text = "";
-    var tkSymbol : Text = "";
+    let tkName : Text = coinName;
+    let tkSymbol : Text = coinSymbol;
 
     let daoPosts = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
 
@@ -48,7 +48,9 @@ actor class DAO(name : Text, manifesto : Text) {
     //  DAO members methods  //
     //                       //
 
-    public shared ({ caller }) func addMember(member : Member) : async Result<(), Text> {
+    public shared ({ caller }) func addMember(name : Text, age : Nat) : async Result<(), Text> {
+        let member : Member = { principal = caller; name; age };
+
         switch (daoMembers.get(caller)) {
             case (null) {
                 daoMembers.put(caller, member);
@@ -95,15 +97,11 @@ actor class DAO(name : Text, manifesto : Text) {
         };
     };
 
+    public shared query func getAllPrincipals() : async [Principal] {
+        return Iter.toArray(daoMembers.keys());
+    };
+
     public shared query func getAllMembers() : async [Member] {
-        /*let newArray = Buffer.Buffer<Member>(5);
-
-        for ((key, value) in daoMembers.entries()) {
-            newArray.add(value);
-        };
-
-        return Buffer.toArray(newArray);*/
-
         return Iter.toArray(daoMembers.vals());
     };
 
@@ -124,26 +122,52 @@ actor class DAO(name : Text, manifesto : Text) {
     };
 
     public func mint(owner : Principal, amount : Nat) : async Result<(), Text> {
-        return #err("NIY");
+        let balanceOwner = Option.get(daoLedger.get(owner), 0);
+        daoLedger.put(owner, balanceOwner + amount);
+
+        return #ok();
     };
 
     public func burn(owner : Principal, amount : Nat) : async Result<(), Text> {
-        return #err("NIY");
+        let balanceOwner = Option.get(daoLedger.get(owner), 0);
+        if(amount > balanceOwner) {
+            return #err("This principal doesn't have enough balance to burn");
+        };
+        daoLedger.put(owner, balanceOwner - amount);
+        return #ok();
     };
 
     public shared ({ caller }) func transfer(from : Principal, to : Principal, amount : Nat) : async Result<(), Text> {
-        return #err("NIY");
+        let balanceFrom = Option.get(daoLedger.get(from), 0);
+        let balanceTo = Option.get(daoLedger.get(to), 0);
+
+        if(amount > balanceFrom) {
+            return #err("The 'From' balance isn't enough for the transfer");
+        };
+
+        daoLedger.put(from, balanceFrom - amount);
+        daoLedger.put(to, balanceTo + amount);
+
+        return #ok();
     };
 
-    public query func balanceOf() : async Nat {
-        return 0;
+    public query func balanceOf(acc: Principal) : async Nat {
+        return (Option.get(daoLedger.get(acc), 0));
     };
 
     public query func totalSupply() : async Nat {
-        return 0;
+        var totalBal = 0;
+
+        for(balance in daoLedger.vals()) {
+            totalBal := totalBal + balance;
+        };
+
+        return totalBal;
     };
 
-    // DAO Info
+    //            //
+    //  DAO Info  //
+    //            //
 
     public query func daoBalance() : async Nat {
         return Cycles.balance();
