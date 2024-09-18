@@ -6,24 +6,36 @@ import Iter "mo:base/Iter";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
 import Cycles "mo:base/ExperimentalCycles";
+import Hash "mo:base/Hash";
+import Nat64 "mo:base/Nat64";
+import Time "mo:base/Time";
 
 import Types "daoTemp.types";
 
 actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Text) {
     
     type Member = Types.Member;
+    type Vote = Types.Vote;
+    type Proposal = Types.Proposal;
+    type ProposalId = Types.ProposalId;
+    type ProposalStatus = Types.ProposalStatus;
+    type ProposalContent = Types.ProposalContent;
     type HashMap<K, V> = Types.HashMap<K, V>;
     type Result<Ok, Err> = Types.Result<Ok, Err>;
 
 
     let daoName : Text = name;
     var daoManifesto : Text = manifesto;
+    let daoGoals = Buffer.Buffer<Text>(0);
 
     let daoMembers = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
 
     let daoLedger = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
     let tkName : Text = coinName;
     let tkSymbol : Text = coinSymbol;
+
+    stable var nextProposalId : Nat64 = 0;
+    let daoProposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
 
     let daoPosts = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
 
@@ -42,6 +54,15 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
     public func setManifesto(newManifesto : Text) : async () {
         daoManifesto := newManifesto;
         return;
+    };
+
+    public func addGoal(newGoal : Text) : async () {
+        daoGoals.add(newGoal);
+        return;
+    };
+
+    public shared query func getGoals() : async [Text] {
+        Buffer.toArray(daoGoals);
     };
 
     //                       //
@@ -165,12 +186,145 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         return totalBal;
     };
 
+    //             //
+    //  DAO Posts  //
+    //             //
+
+    public shared ({ caller }) func createProposal(content : ProposalContent) : async Result<ProposalId, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+
+        let balanceCaller = Option.get(daoLedger.get(caller), 0);
+        if(balanceCaller < 1) {
+            return #err("You need at least 1 ' # tkName # ' token to create a proposal");
+        };
+        let newProposal = {
+            id = nextProposalId;
+            content;
+            creator = caller;
+            created = Time.now();
+            executed = null;
+            votes = [];
+            voteScore = 0;
+            status = #Open;
+        };
+        daoProposals.put(nextProposalId, newProposal);
+        _burn(caller, 1);
+        nextProposalId += 1;
+        return #ok(nextProposalId - 1);
+    };
+
+    public shared func getProposal(proposalId : ProposalId) : async ?Proposal {
+        return daoProposals.get(proposalId);
+    };
+
+    public shared func getAllProposal() : async [Proposal] {
+        return Iter.toArray(daoProposals.vals());
+    };
+    
+    public shared ({ caller }) func voteProposal(proposalId : ProposalId, yesOrNo : Bool) : async Result<(), Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to vote for a proposal");
+        };
+        switch(daoProposals.get(proposalId)) {
+            case(null) {
+                return #err("No proposal found");
+            };
+            case(? proposal) {
+                if(_hasVoted(proposal, caller)) {
+                    return #err("You can only vote once per proposal");
+                };
+
+                let newProposal = _newProposal(proposal, caller, yesOrNo);
+                daoProposals.put(proposal.id, newProposal);
+
+                if(newProposal.status == #Accepted) {
+                    _execute(newProposal);
+                };
+                return #ok();
+            };
+
+        };
+    };
+
+    func _hasVoted(proposal : Proposal, p : Principal) : Bool {
+        for(vote in proposal.votes.vals()) {
+            if(vote.member == p) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    func _newProposal(proposal : Proposal, voter : Principal, yesOrNo : Bool) : Proposal {
+        let votingPower = Option.get(daoLedger.get(voter), 0);
+        let multiplier = switch(yesOrNo) {
+            case(true) {1};
+            case(false) {-1};
+        };
+        let callerVoteScore = votingPower * multiplier;
+        let newVotes = Buffer.fromArray<Vote>(proposal.votes);
+        newVotes.add({
+            member = voter;
+            votingPower;
+            yesOrNo;
+        });
+        let newScore = proposal.voteScore + callerVoteScore;
+        let newStatus = if(newScore >= 100) {
+            #Accepted;
+        } else if(newScore <= - 100) {
+            #Rejected;
+        } else {
+            #Open;
+        };
+        let newProposal = {
+            id = proposal.id;
+            content = proposal.content;
+            creator = proposal.creator;
+            created = proposal.created;
+            executed = proposal.executed;
+            votes = Buffer.toArray(newVotes);
+            voteScore = newScore;
+            status = newStatus;
+        };
+        return newProposal;
+    };
+
+    func _execute(proposal : Proposal) : () {
+        switch(proposal.content) {
+            case(#ChangeManifesto(newManifesto)) {
+                daoManifesto := newManifesto;
+            };
+            case(#AddGoal(newGoal)) {
+                daoGoals.add(newGoal);
+            };
+        };
+        let newProposal = {
+            id = proposal.id;
+            content = proposal.content;
+            creator = proposal.creator;
+            created = proposal.created;
+            executed = ?Time.now();
+            votes = proposal.votes;
+            voteScore = proposal.voteScore;
+            status = proposal.status;
+        };
+        daoProposals.put(proposal.id, newProposal);
+        return;
+    };
+
     //            //
-    //  DAO Info  //
+    //  DAO Misc  //
     //            //
 
     public query func daoBalance() : async Nat {
         return Cycles.balance();
+    };
+
+    func _burn(owner : Principal, amount : Nat) : () {
+        let balance = Option.get(daoLedger.get(owner), 0);
+        daoLedger.put(owner, balance - amount);
     };
 
 };

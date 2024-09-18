@@ -34,7 +34,7 @@ actor {
 
     public func createDao(daoName : Text, daoManifesto : Text, daoTkName : Text, daoTkSymbol : Text) : async () {
 
-        Cycles.add<system>(250000000000); // Pass cycles for the Dao creation
+        Cycles.add<system>(250_000_000_000); // Pass cycles for the Dao creation
 
         let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto, daoTkName, daoTkSymbol);
         daoList.add(dao);
