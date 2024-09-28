@@ -23,7 +23,6 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
     type PostId = Types.PostId;
     type PostContent = Types.PostContent;
     type Post = Types.Post;
-    type CommentId = Types.CommentId;
     type Comment = Types.Comment;
     type HashMap<K, V> = Types.HashMap<K, V>;
     type Result<Ok, Err> = Types.Result<Ok, Err>;
@@ -44,8 +43,6 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
 
     stable var nextPostId : Nat64 = 0;
     let daoPosts = HashMap.HashMap<PostId, Post>(0, Nat64.equal, Nat64.toNat32);
-    
-    stable var nextComId : Nat64 = 0;
 
     //                                            //
     //  getter/setter for DAO name and manifesto  //
@@ -380,9 +377,9 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         };
     };
 
-    public shared ({ caller }) func commentOnPost(content : Text, postId : PostId) : async Result<CommentId, Text> {
+    public shared ({ caller }) func commentOnPost(content : Text, postId : PostId) : async Result<Text, Text> {
         if(Option.isNull(daoMembers.get(caller))) {
-            return #err("You need to be a member to create a proposal");
+            return #err("You need to be a member to comment on this post");
         };
         switch(daoPosts.get(postId)) {
             case(null) {
@@ -390,7 +387,6 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
             };
             case(? post) {
                 let newComment = {
-                    id = nextComId;
                     created = Time.now();
                     author = caller;
                     content;
@@ -407,14 +403,41 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
                     comments = Buffer.toArray(coms);
                 };
                 daoPosts.put(newPost.id, newPost);
-                nextComId += 1;
-                return #ok(nextComId - 1);
+                return #ok(content);
             };
         };
     };
 
-    public shared ({ caller }) func deleteCommentOnPost() : async Result<Text, Text> {
-        return #err("NIY");
+    public shared ({ caller }) func deleteCommentOnPost(commentId : Nat, postId : PostId) : async Result<Text, Text> {
+        var message : Text = "";
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+        switch(daoPosts.get(postId)) {
+            case(null) { 
+                return #err("Post not found");
+            };
+            case(? post) {
+                let newComments = Buffer.fromArray<Comment>(post.comments);
+                if(newComments.get(commentId).author == caller) {
+                    let _ = newComments.remove(commentId);
+                    message := "Comment succesfully deleted";
+                } else {
+                    message := "You can't delete this comment";
+                };
+
+                let newPost = {
+                    id = post.id;
+                    author = post.author;
+                    created = post.created;
+                    content = post.content;
+                    likes = post.likes;
+                    comments = Buffer.toArray(newComments);
+                };
+                daoPosts.put(newPost.id, newPost);
+                return #ok(message);
+            };
+        };
     };
 
     func _liked(post : Post, user : Principal) : Bool {

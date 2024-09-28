@@ -65,9 +65,7 @@ module {
         comments : [Comment];
     };
 
-    public type CommentId = Nat64;
     public type Comment = {
-        id : Nat64;
         created : Time.Time;
         author : Principal;
         content : Text;
