@@ -408,6 +408,7 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         };
     };
 
+    // Error ocurrs when entering id that doesn't match to any comment
     public shared ({ caller }) func deleteCommentOnPost(commentId : Nat, postId : PostId) : async Result<Text, Text> {
         var message : Text = "";
         if(Option.isNull(daoMembers.get(caller))) {
