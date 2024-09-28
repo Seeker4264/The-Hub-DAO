@@ -50,16 +50,27 @@ module {
 
     // Posts & Comments
 
-    public type Comment = {
-        comDate : Text;
-        comDesc : Text;
+    public type PostId = Nat64;
+    public type PostContent = {
+        title : Text;
+        content : Text;
     };
 
     public type Post = {
-        postDate : Text;
-        postTitle : Text;
-        postDesc : Text;
-        postComments : HashMap<Principal, Comment>;
+        id : Nat64;
+        author : Principal;
+        created : Time.Time;
+        content : PostContent;
+        likes : [Principal];
+        comments : [Comment];
+    };
+
+    public type CommentId = Nat64;
+    public type Comment = {
+        id : Nat64;
+        created : Time.Time;
+        author : Principal;
+        content : Text;
     };
 
 };

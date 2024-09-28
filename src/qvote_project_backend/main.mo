@@ -1,10 +1,10 @@
-import Principal "mo:base/Principal";
+// import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
-import HashMap "mo:base/HashMap";
+// import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
-import Option "mo:base/Option";
-import Array "mo:base/Array";
+// import Option "mo:base/Option";
+// import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
 
@@ -50,7 +50,7 @@ actor {
             let dao = daoList.get(i);
             let naming = await dao.getName();
             if (naming == daoName) {
-                let x = daoList.remove(i);
+                let _x = daoList.remove(i);
                 return #ok("DAO deleted successfully");
             };
         };

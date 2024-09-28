@@ -4,9 +4,9 @@ import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Option "mo:base/Option";
-import Array "mo:base/Array";
+// import Array "mo:base/Array";
 import Cycles "mo:base/ExperimentalCycles";
-import Hash "mo:base/Hash";
+// import Hash "mo:base/Hash";
 import Nat64 "mo:base/Nat64";
 import Time "mo:base/Time";
 
@@ -20,6 +20,11 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
     type ProposalId = Types.ProposalId;
     type ProposalStatus = Types.ProposalStatus;
     type ProposalContent = Types.ProposalContent;
+    type PostId = Types.PostId;
+    type PostContent = Types.PostContent;
+    type Post = Types.Post;
+    type CommentId = Types.CommentId;
+    type Comment = Types.Comment;
     type HashMap<K, V> = Types.HashMap<K, V>;
     type Result<Ok, Err> = Types.Result<Ok, Err>;
 
@@ -37,7 +42,10 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
     stable var nextProposalId : Nat64 = 0;
     let daoProposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
 
-    let daoPosts = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
+    stable var nextPostId : Nat64 = 0;
+    let daoPosts = HashMap.HashMap<PostId, Post>(0, Nat64.equal, Nat64.toNat32);
+    
+    stable var nextComId : Nat64 = 0;
 
     //                                            //
     //  getter/setter for DAO name and manifesto  //
@@ -158,7 +166,7 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         return #ok();
     };
 
-    public shared ({ caller }) func transfer(from : Principal, to : Principal, amount : Nat) : async Result<(), Text> {
+    public shared func transfer(from : Principal, to : Principal, amount : Nat) : async Result<(), Text> {
         let balanceFrom = Option.get(daoLedger.get(from), 0);
         let balanceTo = Option.get(daoLedger.get(to), 0);
 
@@ -186,9 +194,9 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         return totalBal;
     };
 
-    //             //
-    //  DAO Posts  //
-    //             //
+    //                 //
+    //  DAO Proposals  //
+    //                 //
 
     public shared ({ caller }) func createProposal(content : ProposalContent) : async Result<ProposalId, Text> {
         if(Option.isNull(daoMembers.get(caller))) {
@@ -313,7 +321,128 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
         daoProposals.put(proposal.id, newProposal);
         return;
     };
+    
+    //                        //
+    //  DAO Posts & Comments  //
+    //                        //
 
+    public shared ({ caller }) func createPost(content : PostContent) : async Result<Text, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+
+        let newPost = {
+            id = nextPostId;
+            author = caller;
+            created = Time.now();
+            content;
+            likes = [];
+            comments = [];
+        };
+
+        daoPosts.put(nextPostId, newPost);
+        nextPostId += 1;
+        return #ok(Principal.toText(caller) # " created a post");
+    };
+
+    public shared func getPost(postId : PostId) : async ?Post {
+        return daoPosts.get(postId);
+    };
+
+    public shared func getAllPosts() : async [Post] {
+        return Iter.toArray(daoPosts.vals());
+    };
+
+    public shared func deletePost(postId : PostId) : async Result<Text, Text> {
+        switch (daoPosts.get(postId)) {
+            case (null) {
+                return #err("Post does not exist");
+            };
+            case (?_post) {
+                daoPosts.delete(postId);
+                return #ok("Post deleted successfully");
+            };
+        };
+    };
+
+    public shared ({ caller }) func likePost(postId : PostId) : async Result<PostId, Text> {
+        switch(daoPosts.get(postId)) {
+            case(null) {
+                return #err("No proposal found");
+            };
+            case(? post) {
+                let newPost = _newPost(post, caller);
+                daoPosts.put(postId, newPost);
+
+                return #ok(postId);
+            };
+
+        };
+    };
+
+    public shared ({ caller }) func commentOnPost(content : Text, postId : PostId) : async Result<CommentId, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+        switch(daoPosts.get(postId)) {
+            case(null) {
+                return #err("Post not found");
+            };
+            case(? post) {
+                let newComment = {
+                    id = nextComId;
+                    created = Time.now();
+                    author = caller;
+                    content;
+                };
+                let coms = Buffer.fromArray<Comment>(post.comments);
+                let _ = coms.add(newComment);
+
+                let newPost = {
+                    id = post.id;
+                    author = post.author;
+                    created = post.created;
+                    content = post.content;
+                    likes = post.likes;
+                    comments = Buffer.toArray(coms);
+                };
+                daoPosts.put(newPost.id, newPost);
+                nextComId += 1;
+                return #ok(nextComId - 1);
+            };
+        };
+    };
+
+    public shared ({ caller }) func deleteCommentOnPost() : async Result<Text, Text> {
+        return #err("NIY");
+    };
+
+    func _liked(post : Post, user : Principal) : Bool {
+        for(like in post.likes.vals()) {
+            if(like == user) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    func _newPost(post : Post, user : Principal) : Post {
+        let newLikes = Buffer.fromArray<Principal>(post.likes);
+        switch(Buffer.indexOf(user, newLikes, Principal.equal)) {
+            case(null) { let _ = newLikes.add(user); };
+            case(? inX) { let _ = newLikes.remove(inX) };
+        };
+        let newPost = {
+            id = post.id;
+            author = post.author;
+            created = post.created;
+            content = post.content;
+            likes = Buffer.toArray(newLikes);
+            comments = post.comments;
+        };
+        return newPost;
+    };
+    
     //            //
     //  DAO Misc  //
     //            //
