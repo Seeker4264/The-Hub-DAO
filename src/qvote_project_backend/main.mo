@@ -34,9 +34,9 @@ actor {
 
     public func createDao(daoName : Text, daoManifesto : Text, daoTkName : Text, daoTkSymbol : Text) : async () {
 
-        Cycles.add<system>(250_000_000_000); // Pass cycles for the Dao creation
+        Cycles.add<system>(500_000_000_000); // Pass cycles for the Dao creation
 
-        let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto, daoTkName, daoTkSymbol);
+        let dao : indDao = await daoTemplate.DAO(daoName, daoManifesto, daoTkName, daoTkSymbol, credit, 5_000_000_000);
         daoList.add(dao);
         return;
     };
@@ -50,8 +50,17 @@ actor {
             let dao = daoList.get(i);
             let naming = await dao.getName();
             if (naming == daoName) {
-                let _x = daoList.remove(i);
-                return #ok("DAO deleted successfully");
+                var message : Text = "";
+                let x = await daoList.get(i).daoBalance();
+                let amount : Nat = x - 8_000_000_000;
+                try {
+                    await daoList.get(i).withdraw(amount);
+                    message := "Cycles claimed";
+                } catch(_e) {
+                    message := "Cycles couldn't be claimed";
+                };
+                let _ = daoList.remove(i);
+                return #ok("DAO deleted successfully | " # message);
             };
         };
 
@@ -170,10 +179,6 @@ actor {
         };
     };
 
-    // Members
-
-    
-
     // Balance
 
     public func daoCyclesBalance(daoName : Text) : async Result<Nat, Text> {
@@ -195,6 +200,17 @@ actor {
 
     public query func mainDaoBalance() : async Nat {
         return Cycles.balance();
+    };
+
+    public func credit() : async () {
+        let available = Cycles.available();
+        let accepted = Cycles.accept<system>(available);
+        assert (accepted == available);
+    };
+
+    public shared func withdrawFromDao() : async () {
+        await daoList.get(0).withdraw(1_000_000);
+        // assert (500_000 == (await daoList.get(0).getSavings()));
     };
 
     //                                  //

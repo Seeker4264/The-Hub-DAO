@@ -12,7 +12,17 @@ import Time "mo:base/Time";
 
 import Types "daoTemp.types";
 
-actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Text) {
+shared(msg) actor class DAO(
+    name : Text,
+    manifesto : Text,
+    coinName : Text,
+    coinSymbol : Text,
+    benefit : shared () -> async (),
+    capacity: Nat
+    ) {
+
+    let owner = msg.caller;
+    var savings = 0;
     
     type Member = Types.Member;
     type Vote = Types.Vote;
@@ -473,6 +483,31 @@ actor class DAO(name : Text, manifesto : Text, coinName : Text, coinSymbol : Tex
 
     public query func daoBalance() : async Nat {
         return Cycles.balance();
+    };
+
+    public shared(msg) func getSavings() : async Nat {
+        assert (msg.caller == owner);
+        return savings;
+    };
+
+    public func deposit() : async () {
+        let amount = Cycles.available();
+        let limit : Nat = capacity - savings;
+        let acceptable =
+        if (amount <= limit) amount
+        else limit;
+        let accepted = Cycles.accept<system>(acceptable);
+        assert (accepted == acceptable);
+        savings += acceptable;
+    };
+
+    public shared(msg) func withdraw(amount : Nat) : async () {
+        assert (msg.caller == owner);
+        //assert (amount <= savings);
+        Cycles.add<system>(amount);
+        await benefit();
+        let _refund = Cycles.refunded();
+        // savings -= amount - refund;
     };
 
     func _burn(owner : Principal, amount : Nat) : () {
