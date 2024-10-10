@@ -85,7 +85,11 @@ shared(msg) actor class DAO(
     //                       //
 
     public shared ({ caller }) func addMember(name : Text, age : Nat) : async Result<(), Text> {
-        let member : Member = { principal = caller; name; age };
+        let member : Member = {
+            principal = caller;
+            name;
+            age;
+        };
 
         switch (daoMembers.get(caller)) {
             case (null) {

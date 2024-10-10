@@ -16,18 +16,18 @@ function Communities() {
         <>
             {/*<div className="flex justify-center items-center">*/}
                 <div className="bg-custom-darkgreen
-                min-w-[70%] max-w-fit
+                min-w-[90%] lg:min-w-[70%] w-fit
                 min-h-96
-                ml-auto mr-auto my-12
+                mx-auto my-8 lg:my-12
                 rounded-3xl">
                     <div className="bg-custom-green
                     rounded-t-3xl
-                    px-[3%] py-[1%]
+                    px-5 py-3
                     text-custom-lightgreen text-xl
                     font-normal">
                         Search by tags
                     </div>
-                    <div className="flex gap-5
+                    <div className="flex flex-col lg:fle-row gap-8 lg:gap-5
                     p-5
                     text-custom-lightgreen text-base">
                         <div className="max-w-40">

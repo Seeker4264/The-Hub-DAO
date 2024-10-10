@@ -33,7 +33,9 @@ function Search() {
             setSearchList(searchCriteria);
         };
 
+        setSearchList([]);
         fetcher();
+        console.log(searchList.length);
     }, [query]);
     
     const renderDAOs = () => {
@@ -55,26 +57,73 @@ function Search() {
         
     };
 
+    const renderLoading = () => {
+        return (
+            <>
+                <div className="border-t-2 border-b-2
+                border-custom-darkgreen-highlighted
+                px-0 py-4">
+                    <div className='rounded-full
+                    w-[9rem]
+                    p-5 mb-3
+                    bg-custom-darkgreen-highlighted'></div>
+                    <div className='rounded-full
+                    w-[22rem]
+                    p-2
+                    bg-custom-darkgreen-highlighted'></div>
+                </div>
+                <div className="border-t-2 border-b-2
+                border-custom-darkgreen-highlighted
+                px-0 py-4">
+                    <div className='rounded-full
+                    w-[13rem]
+                    p-5 mb-3
+                    bg-custom-darkgreen-highlighted'></div>
+                    <div className='rounded-full
+                    w-[32rem]
+                    p-2
+                    bg-custom-darkgreen-highlighted'></div>
+                </div>
+                <div className="border-t-2 border-b-2
+                border-custom-darkgreen-highlighted
+                px-0 py-4">
+                    <div className='rounded-full
+                    w-[10rem]
+                    p-5 mb-3
+                    bg-custom-darkgreen-highlighted'></div>
+                    <div className='rounded-full
+                    w-[25rem]
+                    p-2
+                    bg-custom-darkgreen-highlighted'></div>
+                </div>
+            </>
+        );
+    };
+
     
 
     return (
         <>
             {/*<div className="flex justify-center items-center">*/}
                 <div className="bg-custom-darkgreen
-                w-[70%]
+                min-w-[90%] lg:min-w-[70%] w-fit max-w-[90%]
                 min-h-96
-                ml-auto mr-auto my-12
+                mx-auto my-8 lg:my-12
                 rounded-3xl">
                     <div className="bg-custom-green
                     rounded-t-3xl
-                    px-[3%] py-[1%]
+                    px-5 py-3
                     text-custom-lightgreen text-xl
                     font-normal">
-                        Results for the search "{query}"
+                        Results for "{query}"
                     </div>
                     <div className="text-custom-green-highlighted
                     text-base
-                    p-5">{renderDAOs()}</div>
+                    p-5">
+                        {searchList.length === 0 ?
+                        renderLoading() :
+                        renderDAOs()}
+                    </div>
                 </div>
             {/*</div>*/}
         </>
