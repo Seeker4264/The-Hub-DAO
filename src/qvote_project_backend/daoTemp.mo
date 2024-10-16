@@ -84,7 +84,9 @@ shared(msg) actor class DAO(
     //  DAO members methods  //
     //                       //
 
-    public shared ({ caller }) func addMember(name : Text, age : Nat) : async Result<(), Text> {
+    // Debug
+
+    public shared ({ caller }) func addMemberD(name : Text, age : Nat) : async Result<(), Text> {
         let member : Member = {
             principal = caller;
             name;
@@ -102,7 +104,7 @@ shared(msg) actor class DAO(
         };
     };
 
-    public shared ({ caller }) func updateMember(memberUp : Member) : async Result<(), Text> {
+    public shared ({ caller }) func updateMemberD(memberUp : Member) : async Result<(), Text> {
         switch (daoMembers.get(caller)) {
             case (null) {
                 return #err("Member does not exist");
@@ -114,13 +116,63 @@ shared(msg) actor class DAO(
         };
     };
 
-    public shared ({ caller }) func removeMember() : async Result<(), Text> {
+    public shared ({ caller }) func removeMemberD() : async Result<(), Text> {
         switch (daoMembers.get(caller)) {
             case (null) {
                 return #err("Member does not exist");
             };
             case (?_member) {
                 daoMembers.delete(caller);
+                return #ok();
+            };
+        };
+    };
+
+    // Func
+
+    
+    public shared func addMember(principal : Principal, name : Text, age : Nat) : async Result<(), Text> {
+        let member : Member = {
+            principal;
+            name;
+            age;
+        };
+
+        switch (daoMembers.get(principal)) {
+            case (null) {
+                daoMembers.put(principal, member);
+                return #ok();
+            };
+            case (?member) {
+                return #err("Member already exists");
+            };
+        };
+    };
+
+    public shared func updateMember(principal : Principal, name : Text, age : Nat) : async Result<(), Text> {
+        switch (daoMembers.get(principal)) {
+            case (null) {
+                return #err("Member does not exist");
+            };
+            case (?_member) {
+                let memberUp : Member = {
+                    principal;
+                    name;
+                    age;
+                };
+                daoMembers.put(principal, memberUp);
+                return #ok();
+            };
+        };
+    };
+
+    public shared func removeMember(principal : Principal) : async Result<(), Text> {
+        switch (daoMembers.get(principal)) {
+            case (null) {
+                return #err("Member does not exist");
+            };
+            case (?_member) {
+                daoMembers.delete(principal);
                 return #ok();
             };
         };
@@ -209,7 +261,9 @@ shared(msg) actor class DAO(
     //  DAO Proposals  //
     //                 //
 
-    public shared ({ caller }) func createProposal(content : ProposalContent) : async Result<ProposalId, Text> {
+    // Debug
+
+    public shared ({ caller }) func createProposalD(content : ProposalContent) : async Result<ProposalId, Text> {
         if(Option.isNull(daoMembers.get(caller))) {
             return #err("You need to be a member to create a proposal");
         };
@@ -233,16 +287,68 @@ shared(msg) actor class DAO(
         nextProposalId += 1;
         return #ok(nextProposalId - 1);
     };
+    
+    public shared ({ caller }) func voteProposalD(proposalId : ProposalId, yesOrNo : Bool) : async Result<(), Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to vote for a proposal");
+        };
+        switch(daoProposals.get(proposalId)) {
+            case(null) {
+                return #err("No proposal found");
+            };
+            case(? proposal) {
+                if(_hasVoted(proposal, caller)) {
+                    return #err("You can only vote once per proposal");
+                };
 
-    public shared func getProposal(proposalId : ProposalId) : async ?Proposal {
+                let newProposal = _newProposal(proposal, caller, yesOrNo);
+                daoProposals.put(proposal.id, newProposal);
+
+                if(newProposal.status == #Accepted) {
+                    _execute(newProposal);
+                };
+                return #ok();
+            };
+
+        };
+    };
+    
+    // Func
+
+    public shared query func getProposal(proposalId : ProposalId) : async ?Proposal {
         return daoProposals.get(proposalId);
     };
 
-    public shared func getAllProposal() : async [Proposal] {
+    public shared query func getAllProposal() : async [Proposal] {
         return Iter.toArray(daoProposals.vals());
     };
+
+    public shared func createProposal(caller : Principal, content : ProposalContent) : async Result<ProposalId, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+
+        let balanceCaller = Option.get(daoLedger.get(caller), 0);
+        if(balanceCaller < 1) {
+            return #err("You need at least 1 ' # tkName # ' token to create a proposal");
+        };
+        let newProposal = {
+            id = nextProposalId;
+            content;
+            creator = caller;
+            created = Time.now();
+            executed = null;
+            votes = [];
+            voteScore = 0;
+            status = #Open;
+        };
+        daoProposals.put(nextProposalId, newProposal);
+        _burn(caller, 1);
+        nextProposalId += 1;
+        return #ok(nextProposalId - 1);
+    };
     
-    public shared ({ caller }) func voteProposal(proposalId : ProposalId, yesOrNo : Bool) : async Result<(), Text> {
+    public shared func voteProposal(caller : Principal, proposalId : ProposalId, yesOrNo : Bool) : async Result<(), Text> {
         if(Option.isNull(daoMembers.get(caller))) {
             return #err("You need to be a member to vote for a proposal");
         };
@@ -337,7 +443,9 @@ shared(msg) actor class DAO(
     //  DAO Posts & Comments  //
     //                        //
 
-    public shared ({ caller }) func createPost(content : PostContent) : async Result<Text, Text> {
+    // Debug
+
+    public shared ({ caller }) func createPostD(content : PostContent) : async Result<Text, Text> {
         if(Option.isNull(daoMembers.get(caller))) {
             return #err("You need to be a member to create a proposal");
         };
@@ -356,27 +464,7 @@ shared(msg) actor class DAO(
         return #ok(Principal.toText(caller) # " created a post");
     };
 
-    public shared func getPost(postId : PostId) : async ?Post {
-        return daoPosts.get(postId);
-    };
-
-    public shared func getAllPosts() : async [Post] {
-        return Iter.toArray(daoPosts.vals());
-    };
-
-    public shared func deletePost(postId : PostId) : async Result<Text, Text> {
-        switch (daoPosts.get(postId)) {
-            case (null) {
-                return #err("Post does not exist");
-            };
-            case (?_post) {
-                daoPosts.delete(postId);
-                return #ok("Post deleted successfully");
-            };
-        };
-    };
-
-    public shared ({ caller }) func likePost(postId : PostId) : async Result<PostId, Text> {
+    public shared ({ caller }) func likePostD(postId : PostId) : async Result<PostId, Text> {
         switch(daoPosts.get(postId)) {
             case(null) {
                 return #err("No proposal found");
@@ -391,7 +479,7 @@ shared(msg) actor class DAO(
         };
     };
 
-    public shared ({ caller }) func commentOnPost(content : Text, postId : PostId) : async Result<Text, Text> {
+    public shared ({ caller }) func commentOnPostD(content : Text, postId : PostId) : async Result<Text, Text> {
         if(Option.isNull(daoMembers.get(caller))) {
             return #err("You need to be a member to comment on this post");
         };
@@ -423,7 +511,7 @@ shared(msg) actor class DAO(
     };
 
     // Error ocurrs when entering id that doesn't match to any comment
-    public shared ({ caller }) func deleteCommentOnPost(commentId : Nat, postId : PostId) : async Result<Text, Text> {
+    public shared ({ caller }) func deleteCommentOnPostD(commentId : Nat, postId : PostId) : async Result<Text, Text> {
         var message : Text = "";
         if(Option.isNull(daoMembers.get(caller))) {
             return #err("You need to be a member to create a proposal");
@@ -455,6 +543,126 @@ shared(msg) actor class DAO(
         };
     };
 
+    // Func
+    
+    public shared func createPost(caller : Principal, content : PostContent) : async Result<Text, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+
+        let newPost = {
+            id = nextPostId;
+            author = caller;
+            created = Time.now();
+            content;
+            likes = [];
+            comments = [];
+        };
+
+        daoPosts.put(nextPostId, newPost);
+        nextPostId += 1;
+        return #ok(Principal.toText(caller) # " created a post");
+    };
+
+    public shared func likePost(caller : Principal, postId : PostId) : async Result<PostId, Text> {
+        switch(daoPosts.get(postId)) {
+            case(null) {
+                return #err("No proposal found");
+            };
+            case(? post) {
+                let newPost = _newPost(post, caller);
+                daoPosts.put(postId, newPost);
+
+                return #ok(postId);
+            };
+
+        };
+    };
+
+    public shared func commentOnPost(caller : Principal, content : Text, postId : PostId) : async Result<Text, Text> {
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to comment on this post");
+        };
+        switch(daoPosts.get(postId)) {
+            case(null) {
+                return #err("Post not found");
+            };
+            case(? post) {
+                let newComment = {
+                    created = Time.now();
+                    author = caller;
+                    content;
+                };
+                let coms = Buffer.fromArray<Comment>(post.comments);
+                let _ = coms.add(newComment);
+
+                let newPost = {
+                    id = post.id;
+                    author = post.author;
+                    created = post.created;
+                    content = post.content;
+                    likes = post.likes;
+                    comments = Buffer.toArray(coms);
+                };
+                daoPosts.put(newPost.id, newPost);
+                return #ok(content);
+            };
+        };
+    };
+
+    // Error ocurrs when entering id that doesn't match to any comment
+    public shared func deleteCommentOnPost(caller : Principal, commentId : Nat, postId : PostId) : async Result<Text, Text> {
+        var message : Text = "";
+        if(Option.isNull(daoMembers.get(caller))) {
+            return #err("You need to be a member to create a proposal");
+        };
+        switch(daoPosts.get(postId)) {
+            case(null) { 
+                return #err("Post not found");
+            };
+            case(? post) {
+                let newComments = Buffer.fromArray<Comment>(post.comments);
+                if(newComments.get(commentId).author == caller) {
+                    let _ = newComments.remove(commentId);
+                    message := "Comment succesfully deleted";
+                } else {
+                    message := "You can't delete this comment";
+                };
+
+                let newPost = {
+                    id = post.id;
+                    author = post.author;
+                    created = post.created;
+                    content = post.content;
+                    likes = post.likes;
+                    comments = Buffer.toArray(newComments);
+                };
+                daoPosts.put(newPost.id, newPost);
+                return #ok(message);
+            };
+        };
+    };
+    
+    public shared func deletePost(postId : PostId) : async Result<Text, Text> {
+        switch (daoPosts.get(postId)) {
+            case (null) {
+                return #err("Post does not exist");
+            };
+            case (?_post) {
+                daoPosts.delete(postId);
+                return #ok("Post deleted successfully");
+            };
+        };
+    };
+
+    public shared query func getPost(postId : PostId) : async ?Post {
+        return daoPosts.get(postId);
+    };
+
+    public shared query func getAllPosts() : async [Post] {
+        return Iter.toArray(daoPosts.vals());
+    };
+
     func _liked(post : Post, user : Principal) : Bool {
         for(like in post.likes.vals()) {
             if(like == user) {
@@ -484,6 +692,14 @@ shared(msg) actor class DAO(
     //            //
     //  DAO Misc  //
     //            //
+
+    public shared func get_principal() : async Principal {
+        return await whoami();
+    };
+
+    public shared query (message) func whoami() : async Principal {
+        return message.caller;
+    };
 
     public query func daoBalance() : async Nat {
         return Cycles.balance();

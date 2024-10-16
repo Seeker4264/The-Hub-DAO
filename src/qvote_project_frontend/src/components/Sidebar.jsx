@@ -14,7 +14,7 @@ function Sidebar() {
             <h2 className="text-xl text-center
             font-medium
             text-custom-lightgreen
-            px-6 py-2">Recent Trends</h2>
+            px-6 py-2">Write your post</h2>
             <hr className="w-[90%]
             border-2
             border-custom-green-searchbar-highlighted

@@ -1,11 +1,11 @@
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { qvote_project_backend } from 'declarations/qvote_project_backend';
 
 
 function Search() {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, _setSearchParams] = useSearchParams();
     const [searchList, setSearchList] = useState([]);
 
     const query = searchParams.get("q");
@@ -35,7 +35,6 @@ function Search() {
 
         setSearchList([]);
         fetcher();
-        console.log(searchList.length);
     }, [query]);
     
     const renderDAOs = () => {
@@ -47,10 +46,14 @@ function Search() {
                 <div key={index} className="border-t-2 border-b-2
                 border-custom-darkgreen-highlighted
                 px-0 py-4">
-                    <h2 className='text-3xl mb-2
-                    text-custom-lightgreen'>{querky.name}</h2>
-                    <p className='text-base
-                    text-custom-lightgreen'>{querky.manifesto}</p>
+                    <Link to={`/community/${querky.name.toLowerCase()}`}>
+                        <div>
+                            <h2 className='text-3xl font-semibold mb-2
+                            text-custom-lightgreen'>{querky.name.toUpperCase()}</h2>
+                            <p className='text-base
+                            text-custom-lightgreen'>{querky.manifesto}</p>
+                        </div>
+                    </Link>
                 </div>
             );
         });
@@ -66,11 +69,11 @@ function Search() {
                     <div className='rounded-full
                     w-[9rem]
                     p-5 mb-3
-                    bg-custom-darkgreen-highlighted'></div>
+                    bg-custom-darkgreen-highlighted' />
                     <div className='rounded-full
                     w-[22rem]
                     p-2
-                    bg-custom-darkgreen-highlighted'></div>
+                    bg-custom-darkgreen-highlighted' />
                 </div>
                 <div className="border-t-2 border-b-2
                 border-custom-darkgreen-highlighted
@@ -78,11 +81,11 @@ function Search() {
                     <div className='rounded-full
                     w-[13rem]
                     p-5 mb-3
-                    bg-custom-darkgreen-highlighted'></div>
+                    bg-custom-darkgreen-highlighted' />
                     <div className='rounded-full
                     w-[32rem]
                     p-2
-                    bg-custom-darkgreen-highlighted'></div>
+                    bg-custom-darkgreen-highlighted' />
                 </div>
                 <div className="border-t-2 border-b-2
                 border-custom-darkgreen-highlighted
@@ -113,8 +116,8 @@ function Search() {
                     <div className="bg-custom-green
                     rounded-t-3xl
                     px-5 py-3
-                    text-custom-lightgreen text-xl
-                    font-normal">
+                    text-2xl font-semibold
+                    text-custom-lightgreen">
                         Results for "{query}"
                     </div>
                     <div className="text-custom-green-highlighted

@@ -23,11 +23,11 @@ function Communities() {
                     <div className="bg-custom-green
                     rounded-t-3xl
                     px-5 py-3
-                    text-custom-lightgreen text-xl
-                    font-normal">
+                    text-2xl font-semibold
+                    text-custom-lightgreen">
                         Search by tags
                     </div>
-                    <div className="flex flex-col lg:fle-row gap-8 lg:gap-5
+                    <div className="flex flex-col lg:flex-row gap-8 lg:gap-5
                     p-5
                     text-custom-lightgreen text-base">
                         <div className="max-w-40">

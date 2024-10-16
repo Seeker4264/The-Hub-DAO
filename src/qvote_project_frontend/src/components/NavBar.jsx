@@ -19,7 +19,7 @@ function NavBar() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if(search) {
-            navigate(`/search?q=${search}`);
+            navigate(`/search?q=${search.toLowerCase()}`);
         }
     };
 
@@ -119,6 +119,7 @@ function NavBar() {
 
                 </div>
                 
+                {/*
                 {!authenticationClient.isAuthenticated &&
                 <div className="hidden lg:block
                     cursor-pointer
@@ -142,6 +143,11 @@ function NavBar() {
                     hover:bg-custom-green-highlighted
                     hover:text-custom-lightgreen-highlighted"
                     onClick={authenticationClient.handleLogout}>Logout</div>}
+                */}
+
+
+
+                {/* Mobile Navbar */}
 
                 <button className="block lg:hidden
                     cursor-pointer
