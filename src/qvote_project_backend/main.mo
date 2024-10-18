@@ -321,6 +321,14 @@ actor {
         // assert (500_000 == (await daoList.get(0).getSavings()));
     };
 
+    public shared func get_principal() : async Principal {
+        return await whoami();
+    };
+
+    public shared query (message) func whoami() : async Principal {
+        return message.caller;
+    };
+
     //                                  //
     //  Custom stable memory functions  //
     //                                  //

@@ -42,7 +42,6 @@ function Community() {
                     return { ...q, comments: modComments };
                 });
 
-                console.log(daoPosts)
 
                 setDaoData({ daoName: daoName.toUpperCase(), daoManifesto, daoGoals, daoMembers, daoPosts });
             } catch (error) {

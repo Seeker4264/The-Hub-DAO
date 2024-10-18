@@ -1,9 +1,9 @@
 
 import { Outlet } from "react-router-dom";
 import { useState, useEffect, createContext } from 'react';
-import { Actor } from "@dfinity/agent";
+import { Actor, HttpAgent } from "@dfinity/agent";
+import { idlFactory } from "../../../declarations/qvote_project_backend/index";
 import { AuthClient, LocalStorage } from "@dfinity/auth-client";
-import { qvote_project_backend } from 'declarations/qvote_project_backend';
 
 import  NavBar  from '../components/NavBar.jsx';
 
@@ -15,13 +15,19 @@ export const useAuthClient = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [identity, setIdentity] = useState(null);
     const [principal, setPrincipal] = useState(null);
+    const [mainActor, setMainActor] = useState(null);
     
     useEffect(() => {
         AuthClient.create({
+            idleOptions: {
+                idleTimeout: 1000 * 60 * 30,
+                disableDefaultIdleCallback: true
+            },
+            identityProvider: "http://iosdy-auaaa-aaaaa-qabqa-cai.localhost:4943/",
             storage: new LocalStorage(),
             keyType: 'Ed25519',
         }).then(async (client) => {
-            handleUpdate(client)
+            handleUpdate(client);
         });
     }, [])
 
@@ -36,11 +42,22 @@ export const useAuthClient = () => {
         setPrincipal(principalTemp);
 
         setCurrentUser(client);
-        
-        
-        Actor.agentOf(qvote_project_backend).replaceIdentity(
-            client.getIdentity()
+
+
+        const identity = await client.getIdentity();
+        const agent = new HttpAgent({ identity });
+
+        const actor = Actor.createActor(idlFactory, {
+            agent,
+            canisterId: process.env.CANISTER_ID_QVOTE_PROJECT_BACKEND,
+        });
+
+        Actor.agentOf(actor).replaceIdentity(
+            await client.getIdentity()
         );
+        
+        
+        setMainActor(actor);
         
     }
 
@@ -72,6 +89,7 @@ export const useAuthClient = () => {
         isAuthenticated,
         identity,
         principal,
+        mainActor,
         handleLogin,
         handleLogout,
     };

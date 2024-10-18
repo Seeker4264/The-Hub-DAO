@@ -119,7 +119,7 @@ function NavBar() {
 
                 </div>
                 
-                {/*
+                
                 {!authenticationClient.isAuthenticated &&
                 <div className="hidden lg:block
                     cursor-pointer
@@ -143,7 +143,7 @@ function NavBar() {
                     hover:bg-custom-green-highlighted
                     hover:text-custom-lightgreen-highlighted"
                     onClick={authenticationClient.handleLogout}>Logout</div>}
-                */}
+                
 
 
 
@@ -236,8 +236,8 @@ function NavBar() {
                     </div>
                 </div>
 
-                {/* button to test auth functionality */}
-                {/*<div className="hidden lg:block 
+                {/* buttons to test auth functionality */}
+                <div className="hidden lg:block 
                     text-custom-lightgreen
                     text-center no-underline
                     font-semibold
@@ -253,7 +253,21 @@ function NavBar() {
                         console.log(authenticationClient.principal.toText())
                         console.log(typeof authenticationClient.principal.toText())
                         console.log(authenticationClient.isAuthenticated)
-                    }}>Test</div>*/}
+                    }}>Test</div>
+
+                
+                <div className="hidden lg:block 
+                    text-custom-lightgreen
+                    text-center no-underline
+                    font-semibold
+                    px-5 py-4
+                    float-right
+                    hover:bg-custom-green-highlighted
+                    hover:text-custom-lightgreen-highlighted"
+                    onClick={async () => {
+                        console.log(await authenticationClient.mainActor.whoami());
+                    }}>Testeo</div>
+                
             </div>
         </header>
     )
